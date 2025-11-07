@@ -18,6 +18,7 @@ async function bootstrap() {
     .addBearerAuth()
     .build();
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
