@@ -1,35 +1,22 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ExpressAdapter } from '@nestjs/platform-express';
-import express, { Request, Response } from 'express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
-const expressApp = express();
-
 async function bootstrap() {
-  const app = await NestFactory.create(
-    AppModule,
-    new ExpressAdapter(expressApp),
-  );
-
+  const app = await NestFactory.create(AppModule);
   app.enableCors({ origin: '*' });
 
   const config = new DocumentBuilder()
     .setTitle('ChartBoard API')
-    .setDescription('게시판 + 차트 + Auth 목업 API')
+    .setDescription('게시판 + 차트 + 인증 데모 백엔드')
     .setVersion('1.0.0')
     .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
 
-  SwaggerModule.setup('swagger', app, document);
+  SwaggerModule.setup('docs', app, document);
 
-  await app.init();
+  await app.listen(process.env.PORT || 3000);
 }
-
 bootstrap();
-
-export default function handler(req: Request, res: Response) {
-  expressApp(req, res);
-}
