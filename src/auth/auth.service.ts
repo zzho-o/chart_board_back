@@ -1,5 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { signJwt } from '../common/jwt.util';
+import type { JwtPayload } from '../common/jwt.util';
 
 @Injectable()
 export class AuthService {
@@ -7,14 +8,21 @@ export class AuthService {
     id: 'u_1',
     email: 'test@test.test',
     password: 'Test!234',
-  };
+  } as const;
 
   login(email: string, password: string) {
-    const { dummyUser } = this;
-    if (email !== dummyUser.email || password !== dummyUser.password) {
+    const user = this.dummyUser;
+
+    if (email !== user.email || password !== user.password) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    const token = signJwt({ id: dummyUser.id, email: dummyUser.email });
-    return { token, user: { id: dummyUser.id, email: dummyUser.email } };
+
+    const payload: JwtPayload = { id: user.id, email: user.email };
+    const token = signJwt(payload);
+
+    return {
+      token,
+      user: { id: user.id, email: user.email },
+    };
   }
 }

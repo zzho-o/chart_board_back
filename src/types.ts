@@ -1,6 +1,6 @@
 export type Category = 'NOTICE' | 'QNA' | 'FREE';
 
-export type Post = {
+export interface Post {
   id: string;
   userId: string;
   title: string;
@@ -8,4 +8,4 @@ export type Post = {
   category: Category;
   tags: string[];
   createdAt: string;
-};
+}

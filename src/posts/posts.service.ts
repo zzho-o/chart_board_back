@@ -17,7 +17,7 @@ export class PostsService {
     }
   }
 
-  list(userId: string, query: any) {
+  list(userId: string, query: { limit?: number; nextCursor?: string }) {
     const { limit = 10, nextCursor } = query;
     const startIndex = nextCursor
       ? this.posts.findIndex((p) => p.id === this.decodeCursor(nextCursor)) + 1
@@ -37,18 +37,21 @@ export class PostsService {
     return this.posts.find((p) => p.userId === userId && p.id === id);
   }
 
-  create(userId: string, dto: any) {
+  create(userId: string, dto: Partial<Post>) {
     const post: Post = {
       id: 'p_' + Math.random().toString(36).substring(2, 8),
       userId,
+      title: dto.title ?? '(제목 없음)',
+      body: dto.body ?? '',
+      category: dto.category ?? 'FREE',
+      tags: dto.tags ?? [],
       createdAt: new Date().toISOString(),
-      ...dto,
     };
     this.posts.push(post);
     return post;
   }
 
-  update(userId: string, id: string, dto: any) {
+  update(userId: string, id: string, dto: Partial<Post>) {
     const idx = this.posts.findIndex((p) => p.userId === userId && p.id === id);
     if (idx === -1) return null;
     this.posts[idx] = { ...this.posts[idx], ...dto };

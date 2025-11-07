@@ -1,11 +1,24 @@
-import jwt from 'jsonwebtoken';
+import * as jwt from 'jsonwebtoken';
 
-const SECRET = 'test_secret'; // 실전에서는 env에서 관리
+const SECRET = 'your_secret_key';
 
-export function signJwt(payload: any) {
+export interface JwtPayload {
+  id: string;
+  email?: string;
+  iat?: number;
+  exp?: number;
+}
+
+export function signJwt(payload: JwtPayload): string {
   return jwt.sign(payload, SECRET, { expiresIn: '1h' });
 }
 
-export function verifyJwt(token: string) {
-  return jwt.verify(token, SECRET);
+export function verifyJwt(token: string): JwtPayload {
+  const decoded = jwt.verify(token, SECRET);
+
+  if (typeof decoded === 'string') {
+    throw new Error('Invalid token payload');
+  }
+
+  return decoded as JwtPayload;
 }
