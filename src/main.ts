@@ -3,12 +3,12 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
+import { Request, Response } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   app.useStaticAssets(join(__dirname, '..', 'node_modules', 'swagger-ui-dist'));
-
   app.enableCors({ origin: '*' });
 
   const config = new DocumentBuilder()
@@ -19,7 +19,6 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-
   SwaggerModule.setup('docs', app, document, {
     swaggerOptions: {
       persistAuthorization: true,
@@ -27,8 +26,10 @@ async function bootstrap() {
     },
   });
 
-  await app.listen(process.env.PORT || 3000);
-  console.log(`Swagger ready → https://chart-board-back.vercel.app/docs`);
-}
+  app.getHttpAdapter().get('/', (req: Request, res: Response) => {
+    res.send('ChartBoard Backend is running.');
+  });
 
+  await app.listen(process.env.PORT || 3000);
+}
 bootstrap();
