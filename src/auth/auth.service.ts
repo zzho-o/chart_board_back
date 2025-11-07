@@ -1,4 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { LoginRequestDto } from './dto/auth.dto';
 import { signJwt } from '../common/jwt.util';
 import type { JwtPayload } from '../common/jwt.util';
 
@@ -10,19 +11,27 @@ export class AuthService {
     password: 'Test!234',
   } as const;
 
-  login(email: string, password: string) {
-    const user = this.dummyUser;
+  login(dto: LoginRequestDto) {
+    const { email, password } = dto;
 
-    if (email !== user.email || password !== user.password) {
-      throw new UnauthorizedException('Invalid credentials');
+    if (
+      email !== this.dummyUser.email ||
+      password !== this.dummyUser.password
+    ) {
+      throw new UnauthorizedException(
+        '이메일 또는 비밀번호가 올바르지 않습니다.',
+      );
     }
 
-    const payload: JwtPayload = { id: user.id, email: user.email };
+    const payload: JwtPayload = {
+      id: this.dummyUser.id,
+      email: this.dummyUser.email,
+    };
     const token = signJwt(payload);
 
     return {
       token,
-      user: { id: user.id, email: user.email },
+      user: { id: this.dummyUser.id, email: this.dummyUser.email },
     };
   }
 }

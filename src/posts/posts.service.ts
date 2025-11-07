@@ -1,13 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { Post } from 'src/types';
+import {
+  PostCreateRequestDto,
+  PostDto,
+  PostUpdateRequestDto,
+} from './dto/posts.dto';
 
 @Injectable()
 export class PostsService {
-  private posts: Post[] = [];
+  private posts: PostDto[] = [];
 
-  private encodeCursor(post: Post) {
+  private encodeCursor(post: PostDto) {
     return Buffer.from(post.id).toString('base64');
   }
+
   private decodeCursor(cursor: string | null) {
     if (!cursor) return null;
     try {
@@ -17,14 +22,13 @@ export class PostsService {
     }
   }
 
-  list(userId: string, query: { limit?: number; nextCursor?: string }) {
+  list(query: { limit?: number; nextCursor?: string }) {
     const { limit = 10, nextCursor } = query;
     const startIndex = nextCursor
       ? this.posts.findIndex((p) => p.id === this.decodeCursor(nextCursor)) + 1
       : 0;
 
-    const userPosts = this.posts.filter((p) => p.userId === userId);
-    const slice = userPosts.slice(startIndex, startIndex + Number(limit));
+    const slice = this.posts.slice(startIndex, startIndex + Number(limit));
     const next =
       slice.length === Number(limit)
         ? this.encodeCursor(slice[slice.length - 1])
@@ -33,14 +37,10 @@ export class PostsService {
     return { items: slice, nextCursor: next };
   }
 
-  findOne(userId: string, id: string) {
-    return this.posts.find((p) => p.userId === userId && p.id === id);
-  }
-
-  create(userId: string, dto: Partial<Post>) {
-    const post: Post = {
+  create(dto: PostCreateRequestDto) {
+    const post: PostDto = {
       id: 'p_' + Math.random().toString(36).substring(2, 8),
-      userId,
+      userId: 'u_1', // 임시 유저
       title: dto.title ?? '(제목 없음)',
       body: dto.body ?? '',
       category: dto.category ?? 'FREE',
@@ -51,24 +51,16 @@ export class PostsService {
     return post;
   }
 
-  update(userId: string, id: string, dto: Partial<Post>) {
-    const idx = this.posts.findIndex((p) => p.userId === userId && p.id === id);
+  update(id: string, dto: PostUpdateRequestDto) {
+    const idx = this.posts.findIndex((p) => p.id === id);
     if (idx === -1) return null;
     this.posts[idx] = { ...this.posts[idx], ...dto };
     return this.posts[idx];
   }
 
-  deleteOne(userId: string, id: string) {
+  remove(id: string) {
     const before = this.posts.length;
-    this.posts = this.posts.filter(
-      (p) => !(p.userId === userId && p.id === id),
-    );
-    return { ok: true, deleted: before - this.posts.length };
-  }
-
-  deleteAll(userId: string) {
-    const before = this.posts.length;
-    this.posts = this.posts.filter((p) => p.userId !== userId);
+    this.posts = this.posts.filter((p) => p.id !== id);
     return { ok: true, deleted: before - this.posts.length };
   }
 }
