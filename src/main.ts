@@ -1,13 +1,16 @@
 import { NestFactory } from '@nestjs/core';
-import { ExpressAdapter } from '@nestjs/platform-express';
-import express from 'express';
 import { AppModule } from './app.module';
+import { ExpressAdapter } from '@nestjs/platform-express';
+import express, { Request, Response } from 'express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
-const server = express();
+const expressApp = express();
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
+  const app = await NestFactory.create(
+    AppModule,
+    new ExpressAdapter(expressApp),
+  );
 
   app.enableCors({ origin: '*' });
 
@@ -18,13 +21,15 @@ async function bootstrap() {
     .addBearerAuth()
     .build();
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+
+  SwaggerModule.setup('swagger', app, document);
 
   await app.init();
 }
 
 bootstrap();
 
-export default server;
+export default function handler(req: Request, res: Response) {
+  expressApp(req, res);
+}
