@@ -10,12 +10,16 @@ import { verifyJwt } from './jwt.util';
 export class JwtGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const req = context.switchToHttp().getRequest();
-    const auth = req.headers.authorization;
-    if (!auth) throw new UnauthorizedException('Missing Authorization header');
+    const auth = req.headers['authorization'];
+    if (!auth || !auth.startsWith('Bearer ')) throw new UnauthorizedException();
+
     const token = auth.replace('Bearer ', '');
-    const payload = verifyJwt(token);
-    if (!payload) throw new UnauthorizedException('Invalid token');
-    req.user = payload;
-    return true;
+    try {
+      const decoded = verifyJwt(token);
+      req.user = decoded;
+      return true;
+    } catch {
+      throw new UnauthorizedException();
+    }
   }
 }

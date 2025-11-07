@@ -1,19 +1,36 @@
 import { Injectable } from '@nestjs/common';
+import { Post } from 'src/types';
 
 @Injectable()
 export class PostsService {
-  private posts: {
-    id: string;
-    userId: string;
-    title: string;
-    body: string;
-    category: string;
-    tags: string[];
-    createdAt: Date;
-  }[] = [];
+  private posts: Post[] = [];
 
-  findAll(userId: string) {
-    return this.posts.filter((p) => p.userId === userId);
+  private encodeCursor(post: Post) {
+    return Buffer.from(post.id).toString('base64');
+  }
+  private decodeCursor(cursor: string | null) {
+    if (!cursor) return null;
+    try {
+      return Buffer.from(cursor, 'base64').toString('utf8');
+    } catch {
+      return null;
+    }
+  }
+
+  list(userId: string, query: any) {
+    const { limit = 10, nextCursor } = query;
+    const startIndex = nextCursor
+      ? this.posts.findIndex((p) => p.id === this.decodeCursor(nextCursor)) + 1
+      : 0;
+
+    const userPosts = this.posts.filter((p) => p.userId === userId);
+    const slice = userPosts.slice(startIndex, startIndex + Number(limit));
+    const next =
+      slice.length === Number(limit)
+        ? this.encodeCursor(slice[slice.length - 1])
+        : null;
+
+    return { items: slice, nextCursor: next };
   }
 
   findOne(userId: string, id: string) {
@@ -21,10 +38,10 @@ export class PostsService {
   }
 
   create(userId: string, dto: any) {
-    const post = {
+    const post: Post = {
       id: 'p_' + Math.random().toString(36).substring(2, 8),
       userId,
-      createdAt: new Date(),
+      createdAt: new Date().toISOString(),
       ...dto,
     };
     this.posts.push(post);

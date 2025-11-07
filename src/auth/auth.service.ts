@@ -5,8 +5,8 @@ import { signJwt } from '../common/jwt.util';
 export class AuthService {
   private readonly dummyUser = {
     id: 'u_1',
-    email: 'alice@example.com',
-    password: 'alice1234',
+    email: 'test@test.test',
+    password: 'Test!234',
   };
 
   login(email: string, password: string) {

@@ -1,47 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { faker } from '@faker-js/faker';
 
 @Injectable()
 export class MockService {
-  private posts = Array.from({ length: 500 }).map((_, i) => ({
-    id: `m_${(i + 1).toString().padStart(4, '0')}`,
-    userId: `u_mock_${i + 1}`,
-    title: `샘플 포스트 #${i + 1}`,
-    body: `이것은 고정된 테스트용 포스트 본문입니다. (${i + 1})번째 게시글.`,
-    category: faker.helpers.arrayElement(['NOTICE', 'QNA', 'FREE']),
-    tags: [faker.helpers.arrayElement(['react', 'typescript', 'nextjs'])],
-    createdAt: new Date(Date.now() - i * 3600000),
-  }));
-
-  getMockPosts(count = 300) {
-    return { items: this.posts.slice(0, Math.min(count, 500)), count };
-  }
-
-  getCoffeeConsumption() {
-    return {
-      teams: ['Frontend', 'Backend', 'AI'].map((team) => ({
-        team,
-        series: Array.from({ length: 5 }).map((_, i) => ({
-          cups: i + 1,
-          bugs: faker.number.int({ min: 6, max: 14 }),
-          productivity: faker.number.int({ min: 60, max: 90 }),
-        })),
-      })),
-    };
-  }
-
-  getWeeklyMoodTrend() {
-    return Array.from({ length: 5 }).map((_, i) => ({
-      week: faker.date
-        .recent({ days: 40 - i * 7 })
-        .toISOString()
-        .split('T')[0],
-      happy: faker.number.int({ min: 50, max: 80 }),
-      tired: faker.number.int({ min: 10, max: 30 }),
-      stressed: faker.number.int({ min: 5, max: 15 }),
-    }));
-  }
-
   getTopCoffeeBrands() {
     return [
       { brand: '스타벅스', popularity: 40 },
@@ -50,5 +10,52 @@ export class MockService {
       { brand: '바나프레소', popularity: 10 },
       { brand: '기타', popularity: 5 },
     ];
+  }
+
+  getWeeklyMoodTrend() {
+    return [
+      { week: '2024-11-25', happy: 68, tired: 21, stressed: 11 },
+      { week: '2024-12-02', happy: 61, tired: 25, stressed: 14 },
+      { week: '2024-12-09', happy: 72, tired: 18, stressed: 10 },
+      { week: '2024-12-16', happy: 58, tired: 30, stressed: 12 },
+      { week: '2024-12-23', happy: 80, tired: 15, stressed: 5 },
+    ];
+  }
+
+  getCoffeeConsumption() {
+    return {
+      teams: [
+        {
+          team: 'Frontend',
+          series: [
+            { cups: 1, bugs: 12, productivity: 60 },
+            { cups: 2, bugs: 8, productivity: 72 },
+            { cups: 3, bugs: 6, productivity: 85 },
+            { cups: 4, bugs: 7, productivity: 83 },
+            { cups: 5, bugs: 9, productivity: 78 },
+          ],
+        },
+        {
+          team: 'Backend',
+          series: [
+            { cups: 1, bugs: 14, productivity: 58 },
+            { cups: 2, bugs: 10, productivity: 70 },
+            { cups: 3, bugs: 7, productivity: 82 },
+            { cups: 4, bugs: 8, productivity: 80 },
+            { cups: 5, bugs: 11, productivity: 75 },
+          ],
+        },
+        {
+          team: 'AI',
+          series: [
+            { cups: 1, bugs: 13, productivity: 62 },
+            { cups: 2, bugs: 9, productivity: 74 },
+            { cups: 3, bugs: 6, productivity: 88 },
+            { cups: 4, bugs: 7, productivity: 86 },
+            { cups: 5, bugs: 10, productivity: 80 },
+          ],
+        },
+      ],
+    };
   }
 }
